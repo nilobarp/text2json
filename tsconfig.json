@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "sourceMap": false,
+    "pretty": true,
+    "declaration": true,
+    "declarationDir": "dist/types",
+    "removeComments": false,
+    "target": "es5",
+    "outDir": "dist",
+    "typeRoots": [
+      "node_modules/@types"
+    ],
+    "module": "es6",
+    "moduleResolution": "node"
+  }
+}
