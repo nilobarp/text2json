@@ -49,7 +49,6 @@
     "standard": "^8.6.0"
   },
   "dependencies": {
-    "event-stream": "^3.3.4",
     "typescript": "^2.0.10",
     "underscore": "^1.8.3"
   }
