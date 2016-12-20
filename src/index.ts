@@ -1,6 +1,6 @@
 import * as debug from 'debug'
 import * as fs from 'fs'
-import * as es from 'event-stream'
+import * as stream from 'stream'
 import { createReadStream } from './streamify'
 
 const d = debug('TP:')
@@ -25,21 +25,22 @@ export type doneparsing = { (err: Error, object: any): void }
 
 export interface iDataParser {
   parserOptions: ParserOptions,
-  csv2json(data: Buffer | string, cb: doneparsing): void
+  text2json(data: Buffer | string, cb?: doneparsing): void
 }
 
-export class Parser implements iDataParser {
+export class Parser extends stream.Transform implements iDataParser {
   parserOptions: ParserOptions
   quote : number
   escapedQuotes : RegExp
 
   constructor(options?: ParserOptions) {
+    super({objectMode: true, highWaterMark: 16})
     this.parserOptions = this.mergeOptions(options)
     this.quote = new Buffer(this.parserOptions.quote)[0]
     this.escapedQuotes = new RegExp(`${this.parserOptions.quote}${this.parserOptions.quote}`, 'g')
   }
 
-  csv2json(data: Buffer | string, cb: doneparsing): void {
+  text2json(data: Buffer | string, cb?: doneparsing): any {
     let dataStream: fs.ReadStream
     if (data instanceof Buffer) {
       dataStream = createReadStream(data, {})
@@ -52,14 +53,10 @@ export class Parser implements iDataParser {
     let hashtable: {}[] = []
     let headers: string[] = []
     let elements : any[] = []
-
-    let bufStart : number = 0
     let bufEnd : number = 0
     let colStart : number = 0
-    let colEnd : number = 0
     let balancedQuotes : boolean = true
     let i : number = 0
-    // let lineNum : number = 1
 
     let separator : number = new Buffer(this.parserOptions.separator)[0]
     let newline : number = new Buffer(this.parserOptions.newline)[0]
@@ -67,15 +64,13 @@ export class Parser implements iDataParser {
 
     dataStream.on('data', (buf: Buffer) => {
       bufEnd = buf.length
-      colStart = bufStart
 
       for (i = 0; i < bufEnd; i++) {
         if (buf[i] === separator || buf[i] === newline) {
-          colEnd = i
-          let _parsed = this._value(buf, colStart, colEnd, elements)
+          let _parsed = this._value(buf, colStart, i, elements)
           elements = _parsed.values
           balancedQuotes = _parsed.parsed
-          if(_parsed.parsed) {
+          if(balancedQuotes) {
             colStart = i + 1
           } 
         }
@@ -90,6 +85,7 @@ export class Parser implements iDataParser {
               headers = this.parserOptions.headers
             }
             headers = this.fillHeaders(headers, elements.length)
+            this.emit('headers', headers)
             if (!this.parserOptions.hasHeader) {
               hashtable[hashtable.length] = this.createHash(headers, elements)
             }
@@ -111,11 +107,20 @@ export class Parser implements iDataParser {
       }
     })
     dataStream.on('end', () => {
-      cb(null, hashtable)
+      if (cb) {
+        cb(null, hashtable)
+      } else {
+        this.emit('end', null)
+      }
     })
     dataStream.on('error', (err) => {
-      cb(err, hashtable)
+      if(cb) {
+        cb(err, hashtable)
+      } else {
+        this.emit('error', err)
+      }
     })
+    return this
   }
 
   private _value(buf : Buffer, start : number, end : number, values : any[]) : ParsedValues {
@@ -147,7 +152,7 @@ export class Parser implements iDataParser {
     for (var i = 0; i < line.length; i++) {
       _hash[headers[i]] = line[i]
     }
-
+    this.emit('row', _hash)
     return _hash;
   }
 

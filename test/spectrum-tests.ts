@@ -14,7 +14,7 @@ describe('CSV spectrum tests', () => {
       let sub = new Parser(opt)
       let testItem = spectrumBuffer('comma_in_quotes.csv', 'comma_in_quotes.json')
       let expected = JSON.parse(testItem.json)
-      sub.csv2json(testItem.text, (err, actual)=>{
+      sub.text2json(testItem.text, (err, actual)=>{
         if(!_.isEqual(expected, actual)) {
           logTestData(expected, actual)
           done (`Failed test for comma_in_quotes`)
@@ -29,7 +29,7 @@ describe('CSV spectrum tests', () => {
       let sub = new Parser(opt)
       let testItem = spectrumBuffer('empty.csv', 'empty.json')
       let expected = JSON.parse(testItem.json)
-      sub.csv2json(testItem.text, (err, actual)=>{
+      sub.text2json(testItem.text, (err, actual)=>{
         if(!_.isEqual(expected, actual)) {
           logTestData(expected, actual)
           done (`Failed test for empty`)
@@ -44,7 +44,7 @@ describe('CSV spectrum tests', () => {
       let sub = new Parser(opt)
       let testItem = spectrumBuffer('empty_crlf.csv', 'empty_crlf.json')
       let expected = JSON.parse(testItem.json)
-      sub.csv2json(testItem.text, (err, actual)=>{
+      sub.text2json(testItem.text, (err, actual)=>{
         if(!_.isEqual(expected, actual)) {
           logTestData(expected, actual)
           done (`Failed test for empty_crlf`)
@@ -59,7 +59,7 @@ describe('CSV spectrum tests', () => {
       let sub = new Parser(opt)
       let testItem = spectrumBuffer('escaped_quotes.csv', 'escaped_quotes.json')
       let expected = JSON.parse(testItem.json)
-      sub.csv2json(testItem.text, (err, actual)=>{
+      sub.text2json(testItem.text, (err, actual)=>{
         if(!_.isEqual(expected, actual)) {
           logTestData(expected, actual)
           done (`Failed test for escaped_quotes`)
@@ -74,7 +74,7 @@ describe('CSV spectrum tests', () => {
       let sub = new Parser(opt)
       let testItem = spectrumBuffer('json.csv', 'json.json')
       let expected = JSON.parse(testItem.json)
-      sub.csv2json(testItem.text, (err, actual)=>{
+      sub.text2json(testItem.text, (err, actual)=>{
         if(!_.isEqual(expected, actual)) {
           logTestData(expected, actual)
           done (`Failed test for json_csv`)
@@ -89,7 +89,7 @@ describe('CSV spectrum tests', () => {
       let sub = new Parser(opt)
       let testItem = spectrumBuffer('newlines.csv', 'newlines.json')
       let expected = JSON.parse(testItem.json)
-      sub.csv2json(testItem.text, (err, actual)=>{
+      sub.text2json(testItem.text, (err, actual)=>{
         if(!_.isEqual(expected, actual)) {
           logTestData(expected, actual)
           done (`Failed test for newlines`)
@@ -104,7 +104,7 @@ describe('CSV spectrum tests', () => {
       let sub = new Parser(opt)
       let testItem = spectrumBuffer('newlines_crlf.csv', 'newlines_crlf.json')
       let expected = JSON.parse(testItem.json)
-      sub.csv2json(testItem.text, (err, actual)=>{
+      sub.text2json(testItem.text, (err, actual)=>{
         if(!_.isEqual(expected, actual)) {
           logTestData(expected, actual)
           done (`Failed test for newlines_crlf`)
@@ -119,7 +119,7 @@ describe('CSV spectrum tests', () => {
       let sub = new Parser(opt)
       let testItem = spectrumBuffer('quotes_and_newlines.csv', 'quotes_and_newlines.json')
       let expected = JSON.parse(testItem.json)
-      sub.csv2json(testItem.text, (err, actual)=>{
+      sub.text2json(testItem.text, (err, actual)=>{
         if(!_.isEqual(expected, actual)) {
           logTestData(expected, actual)
           done (`Failed test for quotes_and_newlines`)
@@ -134,7 +134,7 @@ describe('CSV spectrum tests', () => {
       let sub = new Parser(opt)
       let testItem = spectrumBuffer('simple.csv', 'simple.json')
       let expected = JSON.parse(testItem.json)
-      sub.csv2json(testItem.text, (err, actual)=>{
+      sub.text2json(testItem.text, (err, actual)=>{
         if(!_.isEqual(expected, actual)) {
           logTestData(expected, actual)
           done (`Failed test for simple`)
@@ -149,7 +149,7 @@ describe('CSV spectrum tests', () => {
       let sub = new Parser(opt)
       let testItem = spectrumBuffer('simple_crlf.csv', 'simple_crlf.json')
       let expected = JSON.parse(testItem.json)
-      sub.csv2json(testItem.text, (err, actual)=>{
+      sub.text2json(testItem.text, (err, actual)=>{
         if(!_.isEqual(expected, actual)) {
           logTestData(expected, actual)
           done (`Failed test for simple_crlf`)
@@ -164,7 +164,7 @@ describe('CSV spectrum tests', () => {
       let sub = new Parser(opt)
       let testItem = spectrumBuffer('utf8.csv', 'utf8.json')
       let expected = JSON.parse(testItem.json)
-      sub.csv2json(testItem.text, (err, actual)=>{
+      sub.text2json(testItem.text, (err, actual)=>{
         if(!_.isEqual(expected, actual)) {
           logTestData(expected, actual)
           done (`Failed test for utf8`)
@@ -181,7 +181,7 @@ describe('CSV spectrum tests', () => {
       let sub = new Parser(opt)
       let testItem = spectrumFile('utf8.csv', 'utf8.json')
       let expected = JSON.parse(testItem.json)
-      sub.csv2json(testItem.file, (err, actual)=>{
+      sub.text2json(testItem.file, (err, actual)=>{
         if(!_.isEqual(expected, actual)) {
           logTestData(expected, actual)
           done (`Failed test for data_from_file`)
@@ -199,7 +199,7 @@ describe('CSV spectrum tests', () => {
       let data = `a,b,c\n1,2,3`
       let json = `[{"a": "1","b": "2","c": "3"}]`
       let expected = JSON.parse(json)
-      sub.csv2json(data, (err, actual)=>{
+      sub.text2json(data, (err, actual)=>{
         if(!_.isEqual(expected, actual)) {
           logTestData(expected, actual)
           done (`Failed test for data_from_string`)
@@ -214,7 +214,7 @@ describe('CSV spectrum tests', () => {
       let sub = new Parser(opt)
       let testItem = spectrumFile('tab_separated.csv', 'simple.json')
       let expected = JSON.parse(testItem.json)
-      sub.csv2json(testItem.file, (err, actual)=>{
+      sub.text2json(testItem.file, (err, actual)=>{
         if(!_.isEqual(expected, actual)) {
           logTestData(expected, actual)
           done (`Failed test for tab_separated`)
@@ -230,7 +230,7 @@ describe('CSV spectrum tests', () => {
       let data = `1,2,3\n4,5,6`
       let json = `[{"_0": "1","_1": "2","_2": "3"},{"_0": "4","_1": "5","_2": "6"}]`
       let expected = JSON.parse(json)
-      sub.csv2json(data, (err, actual)=>{
+      sub.text2json(data, (err, actual)=>{
         if(!_.isEqual(expected, actual)) {
           logTestData(expected, actual)
           done (`Failed test for no_header_in_data`)
@@ -246,7 +246,7 @@ describe('CSV spectrum tests', () => {
       let data = `a|b|c\n1|2|3`
       let json = `[{"a": "1","b": "2","c": "3"}]`
       let expected = JSON.parse(json)
-      sub.csv2json(data, (err, actual)=>{
+      sub.text2json(data, (err, actual)=>{
         if(!_.isEqual(expected, actual)) {
           logTestData(expected, actual)
           done (`Failed test for custom_separator`)
@@ -260,7 +260,7 @@ describe('CSV spectrum tests', () => {
       let opt : ParserOptions = {hasHeader: true, encoding: 'utf-8'}
       let sub = new Parser(opt)
       let data = `a,b,c\n1,"2,3`
-      sub.csv2json(data, (err, actual)=>{
+      sub.text2json(data, (err, actual)=>{
         if (err.toString().indexOf('Unmatched quotes') > -1) {
           done()
         } else {
@@ -281,7 +281,7 @@ describe('CSV spectrum tests', () => {
         let sub = new Parser(opt)
         let testItem = spectrumFile(`mock_data_${rows[i]}.txt`, 'simple.json')
         
-        sub.csv2json(testItem.file, (err, data) => {
+        sub.text2json(testItem.file, (err, data) => {
           if (err) {
             console.log(err.toString())
           } else {
