@@ -1,20 +1,20 @@
 {
-  "name": "textparser",
+  "name": "text2json",
   "version": "1.0.0",
-  "description": "Streaming parser for text data to JSON",
+  "description": "Performant parser for textual data (CSV parser)",
   "keywords": [
     "parser",
     "csv",
     "text",
     "tsv",
-    "JSON",
+    "json",
     "streaming",
     "typescript"
   ],
   "main": "./lib/index.js",
   "scripts": {
     "build": "gulp build",
-    "prepublish": "tsc",
+    "prepublish": "npm run release",
     "pretest": "npm run build",
     "test": "DEBUG=TP* mocha dist/test/spectrum-tests.js",
     "release": "gulp release",
@@ -23,7 +23,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/nilobarp/textparser.git"
+    "url": "https://github.com/nilobarp/text2json.git"
   },
   "author": "nilobarp <nilotpal2007@gmail.com>",
   "license": "MIT",
