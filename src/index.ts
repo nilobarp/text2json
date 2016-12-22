@@ -6,7 +6,7 @@ import { createReadStream } from './streamify'
 const d = debug('TP:')
 
 export type ParserOptions = {
-  hasHeader: boolean
+  hasHeader?: boolean
   headers?: string[],
   newline?: string,
   separator?: string,
@@ -83,7 +83,8 @@ export class Parser extends stream.Transform implements iDataParser {
           if (headers.length === 0) {
             if (this.parserOptions.hasHeader) {
               headers = elements.slice(0)
-            } else if (!this.isEmpty(this.parserOptions.headers)) {
+            }
+            if (!this.isEmpty(this.parserOptions.headers)) {
               headers = this.parserOptions.headers
             }
             headers = this.fillHeaders(headers, elements.length)
@@ -193,6 +194,7 @@ export class Parser extends stream.Transform implements iDataParser {
   private mergeOptions(options: ParserOptions): ParserOptions {
     var defaultOpt = this.defaultOptions()
     var opt: ParserOptions = options || defaultOpt
+    options = options || {}
     opt.hasHeader = options.hasHeader || defaultOpt.hasHeader
     opt.headers = options.headers || defaultOpt.headers
     opt.newline = options.newline || defaultOpt.newline

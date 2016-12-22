@@ -91,7 +91,7 @@ The parser accepts following options through its constructor.
 
 ```
 {
-  hasHeader: boolean,
+  hasHeader?: boolean,
   headers?: string[],
   newline?: string,
   separator?: string,
@@ -101,12 +101,12 @@ The parser accepts following options through its constructor.
 }
 ```
 
-* `hasHeader` (required)
+* `hasHeader` (optional)
   * If true, first line is treated as header row.
   * Defaults to `false`.
 * `headers` (optional)
   * An array of strings to be used as headers.
-  * Ignored if `hasHeader` is true.
+  * If specified, overrides header row in data.
   * Defaults is an empty array
 * `newline` (optional)
   * Choose between Unix and Windows line endings (`\n` or `\r\n`)
@@ -140,5 +140,5 @@ Events
 Roadmap
 ---------
   - [ ] Return columns selectively (either by column index or header name)
-  - [ ] Ignore header row in data and use custom header names provided in options
+  - [x] Ignore header row in data and use custom header names provided in options
   - [x] Skip rows (start parsing from a given row number)
