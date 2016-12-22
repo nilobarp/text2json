@@ -11,8 +11,8 @@ export type ParserOptions = {
   newline?: string,
   separator?: string,
   quote?: string,
-  escape?: string,
-  encoding?: string
+  encoding?: string,
+  skipRows?: number
 }
 
 type ParsedValues = {
@@ -53,6 +53,8 @@ export class Parser extends stream.Transform implements iDataParser {
     let hashtable: {}[] = []
     let headers: string[] = []
     let elements : any[] = []
+    let rowsSkipped : number = 0
+    let skipThisRow : boolean = this.parserOptions.skipRows > 0
     let bufEnd : number = 0
     let colStart : number = 0
     let balancedQuotes : boolean = true
@@ -72,7 +74,7 @@ export class Parser extends stream.Transform implements iDataParser {
           balancedQuotes = _parsed.parsed
           if(balancedQuotes) {
             colStart = i + 1
-          } 
+          }
         }
         if (balancedQuotes && buf[i] === newline) {
           if (crlf) {
@@ -90,8 +92,12 @@ export class Parser extends stream.Transform implements iDataParser {
               hashtable[hashtable.length] = this.createHash(headers, elements)
             }
           } else {
-            if (elements.length)
+            if (!skipThisRow && elements.length) {
               hashtable[hashtable.length] = this.createHash(headers, elements)
+            } else {
+              rowsSkipped++
+            }
+            skipThisRow = !(rowsSkipped >= this.parserOptions.skipRows)
           }
           elements.length = 0
         }
@@ -100,7 +106,7 @@ export class Parser extends stream.Transform implements iDataParser {
       if (!balancedQuotes && i === bufEnd && colStart < bufEnd) {
         let err = 'Unmatched quotes around ' + buf.toString('utf8', colStart, colStart + 20 > bufEnd ? bufEnd : colStart + 20)
         dataStream.emit('error', new Error(err))
-      } else if (i === bufEnd && colStart < bufEnd) {
+      } else if (!skipThisRow && i === bufEnd && colStart < bufEnd) {
         elements = this._value(buf, colStart, bufEnd, elements).values
         hashtable[hashtable.length] = this.createHash(headers, elements)
         colStart = bufEnd
@@ -179,8 +185,8 @@ export class Parser extends stream.Transform implements iDataParser {
       newline: '\n',
       separator: ',',
       quote: '"',
-      escape: '"',
-      encoding: 'utf8'
+      encoding: 'utf8',
+      skipRows: 0
     }
   }
 
@@ -192,8 +198,8 @@ export class Parser extends stream.Transform implements iDataParser {
     opt.newline = options.newline || defaultOpt.newline
     opt.separator = options.separator || defaultOpt.separator
     opt.quote = options.quote || defaultOpt.quote
-    opt.escape = options.escape || defaultOpt.escape
     opt.encoding = options.encoding || defaultOpt.encoding
+    opt.skipRows = options.skipRows || defaultOpt.skipRows
 
     return opt
   }

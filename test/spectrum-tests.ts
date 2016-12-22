@@ -268,6 +268,39 @@ describe('CSV spectrum tests', () => {
         }
       })
     })
+
+    it('skip_rows', (done) => {
+      let opt : ParserOptions = {hasHeader: true, skipRows: 2}
+      let sub = new Parser(opt)
+      let data = `id,firstName,lastName,jobTitle
+1,Jed,Hoppe,Customer Markets Supervisor
+2,Cristian,Miller,Principal Division Specialist
+3,Kenyatta,Schimmel,Product Implementation Executive`
+
+      sub.text2json(data, (err, actual)=>{
+        if (actual.length === 1) {
+          done()
+        } else {
+          done(`expected length 1 got ${actual.length}`)
+        }
+      })
+    })
+
+    it('skip_rows_without_header', (done) => {
+      let opt : ParserOptions = {hasHeader: false, skipRows: 2}
+      let sub = new Parser(opt)
+      let data = `1,Jed,Hoppe,Customer Markets Supervisor
+2,Cristian,Miller,Principal Division Specialist
+3,Kenyatta,Schimmel,Product Implementation Executive`
+
+      sub.text2json(data, (err, actual)=>{
+        if (actual.length === 1) {
+          done()
+        } else {
+          done(`expected length 1 got ${actual.length}`)
+        }
+      })
+    })
   })
 
   describe('parser performance', () => {
