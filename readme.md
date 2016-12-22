@@ -96,7 +96,8 @@ The parser accepts following options through its constructor.
   newline?: string,
   separator?: string,
   quote?: string,
-  encoding?: string
+  encoding?: string,
+  skipRows?: number
 }
 ```
 
@@ -119,6 +120,9 @@ The parser accepts following options through its constructor.
 * `encoding` (optional)
   * Use a different encoding while parsing
   * Defaults to `utf-8`
+* `skipRows` (optional)
+  * Number of rows to skip from top (excluding header)
+  * Default is zero rows
 
 Header fill
 ------------
@@ -137,4 +141,4 @@ Roadmap
 ---------
   - [ ] Return columns selectively (either by column index or header name)
   - [ ] Ignore header row in data and use custom header names provided in options
-  - [ ] Skip rows (start parsing from a given row number)
+  - [x] Skip rows (start parsing from a given row number)
