@@ -41,6 +41,7 @@ export class Parser extends stream.Transform implements iDataParser {
   }
 
   text2json(data: Buffer | string, cb?: doneparsing): any {
+    let streaming : boolean = typeof cb === 'function' ? false : true
     let dataStream: fs.ReadStream
     if (data instanceof Buffer) {
       dataStream = createReadStream(data, {})
@@ -53,6 +54,7 @@ export class Parser extends stream.Transform implements iDataParser {
     let hashtable: {}[] = []
     let headers: string[] = []
     let elements : any[] = []
+    let _hash : {}
     let rowsSkipped : number = 0
     let skipThisRow : boolean = this.parserOptions.skipRows > 0
     let bufEnd : number = 0
@@ -90,11 +92,17 @@ export class Parser extends stream.Transform implements iDataParser {
             headers = this.fillHeaders(headers, elements.length)
             this.emit('headers', headers)
             if (!this.parserOptions.hasHeader) {
-              hashtable[hashtable.length] = this.createHash(headers, elements)
+              _hash = this.createHash(headers, elements, streaming)
+              if (_hash) {
+                hashtable[hashtable.length] = _hash
+              }
             }
           } else {
             if (!skipThisRow && elements.length) {
-              hashtable[hashtable.length] = this.createHash(headers, elements)
+              _hash = this.createHash(headers, elements, streaming)
+              if (_hash) {
+                hashtable[hashtable.length] = _hash
+              }
             } else {
               rowsSkipped++
             }
@@ -109,23 +117,28 @@ export class Parser extends stream.Transform implements iDataParser {
         dataStream.emit('error', new Error(err))
       } else if (!skipThisRow && i === bufEnd && colStart < bufEnd) {
         elements = this._value(buf, colStart, bufEnd, elements).values
-        hashtable[hashtable.length] = this.createHash(headers, elements)
+        _hash = this.createHash(headers, elements, streaming)
+        if (_hash) {
+          hashtable[hashtable.length] = _hash
+        }
         colStart = bufEnd
       }
     })
     dataStream.on('end', () => {
-      if (cb) {
+      if (!streaming) {
         cb(null, hashtable)
       } else {
         this.emit('end', null)
       }
+      hashtable = null
     })
     dataStream.on('error', (err) => {
-      if(cb) {
+      if(!streaming) {
         cb(err, hashtable)
       } else {
         this.emit('error', err)
       }
+      hashtable = null
     })
     return this
   }
@@ -154,13 +167,16 @@ export class Parser extends stream.Transform implements iDataParser {
     return {parsed: balancedQuotes, values: values}
   }
 
-  private createHash(headers: string[], line: string[]): {} {
+  private createHash(headers: string[], line: string[], streaming : boolean = false): {} {
     let _hash = {}
     for (var i = 0; i < line.length; i++) {
       _hash[headers[i]] = line[i]
     }
-    this.emit('row', _hash)
-    return _hash;
+    if (streaming) {
+      this.emit('row', _hash)
+      _hash = null
+    }
+    return _hash
   }
 
   private fillHeaders(headers: any[], numElements: number): any[] {

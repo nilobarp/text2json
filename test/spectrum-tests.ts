@@ -24,6 +24,26 @@ describe('CSV spectrum tests', () => {
       })
     })
 
+    it('comma_in_quotes_streaming', (done) => {
+      let opt : ParserOptions = {hasHeader: true, quote: '"'}
+      let sub = new Parser(opt)
+      let testItem = spectrumBuffer('comma_in_quotes.csv', 'comma_in_quotes.json')
+      let expected = JSON.parse(testItem.json)
+      let actual = []
+      sub.text2json(testItem.text)
+        .on('row', (row) => {
+          actual[actual.length] = row
+        })
+        .on('end', () => {
+          if(!_.isEqual(expected, actual)) {
+            logTestData(expected, actual)
+            done (`Failed test for comma_in_quotes_streaming`)
+          } else {
+            done()
+          }
+        })
+    })
+
     it('empty', (done) => {
       let opt : ParserOptions = {hasHeader: true}
       let sub = new Parser(opt)
@@ -304,25 +324,22 @@ describe('CSV spectrum tests', () => {
   })
 
   describe('parser performance', () => {
-    let rows = [100, 1000, 2000, 5000, 10000, 50000, 100000, 200000]
-    // let rows = [100000]
+    let rows = [5000, 10000, 100000, 200000]
     for (let i = 0; i < rows.length; i++) {
       it(`reads ${rows[i]} rows`, function (done) {
-        console.time(`${rows[i]} rows in `)
         this.timeout(0);
         let opt : ParserOptions = {hasHeader: true, encoding: 'utf-8'}
         let sub = new Parser(opt)
-        let testItem = spectrumFile(`mock_data_${rows[i]}.txt`, 'simple.json')
+
+        let testItem = path.join(__dirname, 'spectrum', 'text', `mock_data_${rows[i]}.txt`)
         
-        sub.text2json(testItem.file, (err, data) => {
-          if (err) {
-            console.log(err.toString())
-          } else {
-            logMemoryUsage()
-            done()
-          }
-          console.timeEnd(`${rows[i]} rows in `)
-        })
+        console.time(`Read ${rows[i]} rows`)
+        sub.text2json(testItem)
+              .on('end', () => {
+                console.timeEnd(`Read ${rows[i]} rows`)
+                logMemoryUsage()
+                done()
+              })
       })
     }
   })

@@ -4,8 +4,8 @@ text2json
 [![npm](http://img.shields.io/npm/v/text2json.svg)](https://www.npmjs.com/package/text2json)
 
 Performant parser for textual data
-* Parse 100K rows in ~750 ms (may vary with data)
-* Very low memory footprint
+* Parse 100K rows in ~550 ms (may vary with data)
+* Very low memory footprint (~10 MB)
 * Supports parsing from file, string or buffers
 * Supports streaming output
 * Passes CSV Acid Test suite [csv-spectrum](https://github.com/maxogden/csv-spectrum)

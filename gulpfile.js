@@ -1,9 +1,5 @@
 var gulp = require('gulp')
 var exec = require('child_process').exec
-var bump = require('gulp-bump')
-var readline = require('readline')
-// var fs = require('fs')
-// var semvar = require('semvar')
 
 gulp.task('build', ['compile'], function () {
   gulp.src('./test/spectrum/text/*')
