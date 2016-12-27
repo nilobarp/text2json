@@ -411,31 +411,6 @@ describe('CSV spectrum tests', () => {
     })
   })
 
-  describe('parser performance', () => {
-    let rows = [5000, 10000, 100000, 200000]
-    // let rows = [100000]
-    for (let i = 0; i < rows.length; i++) {
-      it(`reads ${rows[i]} rows`, function (done) {
-        this.timeout(0);
-        let opt : ParserOptions = {
-          hasHeader: true, 
-          encoding: 'utf-8'
-        }
-        let sub = new Parser(opt)
-
-        let testItem = path.join(__dirname, 'spectrum', 'text', `mock_data_${rows[i]}.txt`)
-        
-        console.time(`Read ${rows[i]} rows`)
-        sub.text2json(testItem)
-              .on('end', () => {
-                console.timeEnd(`Read ${rows[i]} rows`)
-                logMemoryUsage()
-                done()
-              })
-      })
-    }
-  })
-
   function logTestData (expected : any, actual : any) : void {
     console.log('Expected:\n', expected)
     console.log('Actual:\n', actual)

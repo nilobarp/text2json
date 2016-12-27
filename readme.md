@@ -2,6 +2,7 @@ text2json
 =========
 [![Build Status](https://travis-ci.org/nilobarp/text2json.svg?branch=master)](https://travis-ci.org/nilobarp/text2json)
 [![npm](http://img.shields.io/npm/v/text2json.svg)](https://www.npmjs.com/package/text2json)
+[![Coverage Status](https://coveralls.io/repos/github/nilobarp/text2json/badge.svg?branch=master)](https://coveralls.io/github/nilobarp/text2json?branch=master)
 
 Performant parser for textual data
 * Parse 100K rows in ~550 ms (may vary with data)

@@ -17,9 +17,12 @@
     "prepublish": "npm run release",
     "pretest": "npm run build",
     "test": "DEBUG=TP* mocha dist/test/spectrum-tests.js",
+    "perf": "DEBUG=TP* npm run build && mocha dist/test/performance-tests.js",
     "release": "gulp release",
     "gentestdata": "node dist/test/genTestData.js",
-    "debug": "npm run build && DEBUG=TP* node test/debug.js"
+    "debug": "npm run build && DEBUG=TP* node test/debug.js",
+    "cover": "istanbul cover _mocha dist/test/spectrum-tests.js",
+    "coveralls": "istanbul cover _mocha dist/test/spectrum-tests.js --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
   },
   "repository": {
     "type": "git",
@@ -35,7 +38,10 @@
     "@types/mocha": "^2.2.33",
     "@types/node": "0.0.2",
     "@types/underscore": "^1.7.36",
+    "babel-preset-es2015": "^6.18.0",
+    "babel-register": "^6.18.0",
     "chai": "^3.5.0",
+    "coveralls": "^2.11.15",
     "faker": "^3.1.0",
     "gulp": "^3.9.1",
     "gulp-bump": "^2.5.1",
@@ -43,7 +49,9 @@
     "gulp-rename": "^1.2.2",
     "gulp-sourcemaps": "^1.9.1",
     "gulp-uglify": "^2.0.0",
+    "istanbul": "^0.4.5",
     "mocha": "^3.2.0",
+    "mocha-lcov-reporter": "^1.2.0",
     "readline": "^1.3.0",
     "standard": "^8.6.0",
     "typescript": "^2.0.10"
