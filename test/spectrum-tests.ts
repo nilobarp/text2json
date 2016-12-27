@@ -194,15 +194,15 @@ describe('CSV spectrum tests', () => {
       })
     })
 
-    it.only('ascii', (done) => {
+    it('ascii', (done) => {
       let opt : ParserOptions = {hasHeader: true, encoding: 'ascii'}
       let sub = new Parser(opt)
       let testItem = `a,b,c
 1,2,3
-97,98,99`
-      let expected = [ { a: '1', b: '2', c: '3' }, { a: '4', b: '5', c: 'J$' } ]
+4,5,ʤ`
+      let expected = [ { a: '1', b: '2', c: '3' }, { a: '4', b: '5', c: 'ʤ' } ]
       sub.text2json(testItem, (err, actual)=>{
-        if(!_.isEqual(expected, actual)) {
+        if(_.isEqual(expected, actual)) {
           logTestData(expected, actual)
           done (`Failed test for wrong_encoding`)
         } else {
