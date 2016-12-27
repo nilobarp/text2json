@@ -224,6 +224,9 @@ export class Parser extends stream.Transform implements iDataParser {
 
   private createHash(headers: string[], line: string[], streaming : boolean = false): {} {
     let _hash = {}
+    if (!this.columnFilters) {
+      return _hash
+    }
     for (var i = 0; i < this.columnFilters.length; i++) {
       _hash[headers[this.columnFilters[i]]] = line[this.columnFilters[i]]
     }
