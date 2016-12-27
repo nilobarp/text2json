@@ -87,7 +87,7 @@ parse.text2json (rawdata)
 
 Options
 ---------
-The parser accepts following options through its constructor.
+The parser accepts following options through its constructor (all are optional)
 
 ```
 {
@@ -97,36 +97,42 @@ The parser accepts following options through its constructor.
   separator?: string,
   quote?: string,
   encoding?: string,
-  skipRows?: number
+  skipRows?: number,
+  filters?: Filters,
+  headersOnly?: boolean
 }
 ```
 
-* `hasHeader` (optional)
+* `hasHeader` 
   * If true, first line is treated as header row.
   * Defaults to `false`.
-* `headers` (optional)
+* `headers` 
   * An array of strings to be used as headers.
   * If specified, overrides header row in data.
   * Defaults is an empty array
-* `newline` (optional)
+* `newline` 
   * Choose between Unix and Windows line endings (`\n` or `\r\n`)
   * Defaults to `\n`
-* `separator` (optional)
+* `separator` 
   * Specify column separator
   * Defaults is `,` (comma)
-* `quote` (optional)
+* `quote` 
   * Specify quote character
   * Default is `"` (double quotes)
-* `encoding` (optional)
+* `encoding` (see https://nodejs.org/api/buffer.html#buffer_buffers_and_character_encodings)
   * Use a different encoding while parsing
   * Defaults to `utf-8`
-* `skipRows` (optional)
+* `skipRows` 
   * Number of rows to skip from top (excluding header)
   * Default is zero rows
+* `filters` 
+  * Filter columns based on index or header name
+* `headersOnly` 
+  * Parse only header row
 
 Header fill
 ------------
-If `hasHeader` is false and custom headers are not specified, parser will generate headers using a zero based index of the columns. i.e. when data has 6 columns, generated headers will be `['_0', '_1', '_2', '_3', '_4', '_5']`
+If `hasHeader` is false and custom headers are not specified, parser will generate headers using a zero based index of the columns. i.e. when data has 5 columns, generated headers will be `['_1', '_2', '_3', '_4', '_5']`
 
 Header fill will also occur when number of headers given in custom headers array is less than the actual numbers of columns in the data.
 
@@ -139,6 +145,6 @@ Events
 
 Roadmap
 ---------
-  - [ ] Return columns selectively (either by column index or header name)
+  - [x] Return columns selectively (either by column index or header name)
   - [x] Ignore header row in data and use custom header names provided in options
   - [x] Skip rows (start parsing from a given row number)

@@ -192,8 +192,23 @@ describe('CSV spectrum tests', () => {
           done()
         }
       })
+    })
 
-        
+    it.only('ascii', (done) => {
+      let opt : ParserOptions = {hasHeader: true, encoding: 'ascii'}
+      let sub = new Parser(opt)
+      let testItem = `a,b,c
+1,2,3
+97,98,99`
+      let expected = [ { a: '1', b: '2', c: '3' }, { a: '4', b: '5', c: 'J$' } ]
+      sub.text2json(testItem, (err, actual)=>{
+        if(!_.isEqual(expected, actual)) {
+          logTestData(expected, actual)
+          done (`Failed test for wrong_encoding`)
+        } else {
+          done()
+        }
+      })
     })
 
     it('data_from_file', (done) => {
@@ -248,7 +263,7 @@ describe('CSV spectrum tests', () => {
       let opt : ParserOptions = {hasHeader: false, encoding: 'utf-8'}
       let sub = new Parser(opt)
       let data = `1,2,3\n4,5,6`
-      let json = `[{"_0": "1","_1": "2","_2": "3"},{"_0": "4","_1": "5","_2": "6"}]`
+      let json = `[{"_1": "1","_2": "2","_3": "3"},{"_1": "4","_2": "5","_3": "6"}]`
       let expected = JSON.parse(json)
       sub.text2json(data, (err, actual)=>{
         if(!_.isEqual(expected, actual)) {
@@ -280,7 +295,7 @@ describe('CSV spectrum tests', () => {
       let opt : ParserOptions = {hasHeader: true, encoding: 'utf-8'}
       let sub = new Parser(opt)
       let data = `a,b,c\n1,"2,3`
-      sub.text2json(data, (err, actual)=>{
+      sub.text2json(data, (err, actual)=> {
         if (err.toString().indexOf('Unmatched quotes') > -1) {
           done()
         } else {
@@ -321,14 +336,91 @@ describe('CSV spectrum tests', () => {
         }
       })
     })
+
+    it('filter_columns_by_index', (done) => {
+      let opt : ParserOptions = {hasHeader: true, filters: {columns: [3,4]}}
+      let sub = new Parser(opt)
+      let data = `id,firstName,lastName,jobTitle
+1,Jed,Hoppe,Customer Markets Supervisor`
+
+      let json = `[{"lastName": "Hoppe","jobTitle": "Customer Markets Supervisor"}]`
+      let expected = JSON.parse(json)
+      sub.text2json(data, (err, actual)=>{
+        if(!_.isEqual(expected, actual)) {
+          logTestData(expected, actual)
+          done (`Failed test for filter_columns_by_index`)
+        } else {
+          done()
+        }
+      })
+    })
+
+    it('filter_columns_by_name', (done) => {
+      let opt : ParserOptions = {hasHeader: true, filters: {columns: ['lastName','jobTitle']}}
+      let sub = new Parser(opt)
+      let data = `id,firstName,lastName,jobTitle
+1,Jed,Hoppe,Customer Markets Supervisor`
+
+      let json = `[{"lastName": "Hoppe","jobTitle": "Customer Markets Supervisor"}]`
+      let expected = JSON.parse(json)
+      sub.text2json(data, (err, actual)=>{
+        if(!_.isEqual(expected, actual)) {
+          logTestData(expected, actual)
+          done (`Failed test for filter_columns_by_name`)
+        } else {
+          done()
+        }
+      })
+    })
+
+    it('mixed_column_filters', (done) => {
+      let opt : ParserOptions = {hasHeader: true, filters: {columns: [3,'jobTitle']}}
+      let sub = new Parser(opt)
+      let data = `id,firstName,lastName,jobTitle
+1,Jed,Hoppe,Customer Markets Supervisor`
+
+      let json = `[{"lastName": "Hoppe","jobTitle": "Customer Markets Supervisor"}]`
+      let expected = JSON.parse(json)
+      sub.text2json(data, (err, actual)=>{
+        if(!_.isEqual(expected, actual)) {
+          logTestData(expected, actual)
+          done (`Failed test for mixed_column_filters`)
+        } else {
+          done()
+        }
+      })
+    })
+
+    it('parse_headers_only', (done) => {
+      let opt : ParserOptions = {hasHeader: true, headersOnly: true}
+      let sub = new Parser(opt)
+      let data = `id,firstName,lastName,jobTitle
+1,Jed,Hoppe,Customer Markets Supervisor
+2,Cristian,Miller,Principal Division Specialist
+3,Kenyatta,Schimmel,Product Implementation Executive`
+
+      let expected = ['id', 'firstName', 'lastName', 'jobTitle']
+      sub.text2json(data, (err, actual)=>{
+        if(!_.isEqual(expected, actual)) {
+          logTestData(expected, actual)
+          done (`Failed test for parse_headers_only`)
+        } else {
+          done()
+        }
+      })
+    })
   })
 
   describe('parser performance', () => {
     let rows = [5000, 10000, 100000, 200000]
+    // let rows = [100000]
     for (let i = 0; i < rows.length; i++) {
       it(`reads ${rows[i]} rows`, function (done) {
         this.timeout(0);
-        let opt : ParserOptions = {hasHeader: true, encoding: 'utf-8'}
+        let opt : ParserOptions = {
+          hasHeader: true, 
+          encoding: 'utf-8'
+        }
         let sub = new Parser(opt)
 
         let testItem = path.join(__dirname, 'spectrum', 'text', `mock_data_${rows[i]}.txt`)

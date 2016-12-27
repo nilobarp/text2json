@@ -5,6 +5,10 @@ import { createReadStream } from './streamify'
 
 const d = debug('TP:')
 
+export type Filters = {
+  columns?: any[]
+}
+
 export type ParserOptions = {
   hasHeader?: boolean
   headers?: string[],
@@ -12,13 +16,14 @@ export type ParserOptions = {
   separator?: string,
   quote?: string,
   encoding?: string,
-  skipRows?: number
+  skipRows?: number,
+  filters?: Filters,
+  headersOnly?: boolean
 }
 
 type ParsedValues = {
   parsed: boolean,
-  values: any[],
-
+  values: any[]
 }
 
 export type doneparsing = { (err: Error, object: any): void }
@@ -30,14 +35,24 @@ export interface iDataParser {
 
 export class Parser extends stream.Transform implements iDataParser {
   parserOptions: ParserOptions
+  encoding : string
   quote : number
   escapedQuotes : RegExp
+  hasFilters : boolean = false
+  columnFilters : any[]
+  headersParsed : boolean = false
+  columnIndex : number = -1
 
   constructor(options?: ParserOptions) {
     super({objectMode: true, highWaterMark: 16})
     this.parserOptions = this.mergeOptions(options)
+    this.encoding = this.parserOptions.encoding
     this.quote = new Buffer(this.parserOptions.quote)[0]
     this.escapedQuotes = new RegExp(`${this.parserOptions.quote}${this.parserOptions.quote}`, 'g')
+    this.hasFilters = this.parserOptions.filters.columns.length > 0 ? true : false
+    if (this.hasFilters) {
+      this.columnFilters = this.parserOptions.filters.columns
+    }
   }
 
   text2json(data: Buffer | string, cb?: doneparsing): any {
@@ -79,10 +94,11 @@ export class Parser extends stream.Transform implements iDataParser {
           }
         }
         if (balancedQuotes && buf[i] === newline) {
+          this.columnIndex = -1
           if (crlf) {
             colStart = colStart + 1
           }
-          if (headers.length === 0) {
+          if (!this.headersParsed) {
             if (this.parserOptions.hasHeader) {
               headers = elements.slice(0)
             }
@@ -91,6 +107,19 @@ export class Parser extends stream.Transform implements iDataParser {
             }
             headers = this.fillHeaders(headers, elements.length)
             this.emit('headers', headers)
+            this.headersParsed = true
+            if (this.parserOptions.headersOnly) {
+              //close the stream
+              dataStream.push(null)
+            }
+            try {
+              this.columnFilters = this.normalizeColumnFilters(this.columnFilters, headers)
+            } catch (ex) {
+              dataStream.emit('error', ex.toString())
+              //close the stream
+              dataStream.push(null)
+            }
+            
             if (!this.parserOptions.hasHeader) {
               _hash = this.createHash(headers, elements, streaming)
               if (_hash) {
@@ -113,7 +142,7 @@ export class Parser extends stream.Transform implements iDataParser {
       }
 
       if (!balancedQuotes && i === bufEnd && colStart < bufEnd) {
-        let err = 'Unmatched quotes around ' + buf.toString('utf8', colStart, colStart + 20 > bufEnd ? bufEnd : colStart + 20)
+        let err = 'Unmatched quotes around ' + buf.toString(this.encoding, colStart, colStart + 20 > bufEnd ? bufEnd : colStart + 20)
         dataStream.emit('error', new Error(err))
       } else if (!skipThisRow && i === bufEnd && colStart < bufEnd) {
         elements = this._value(buf, colStart, bufEnd, elements).values
@@ -126,7 +155,11 @@ export class Parser extends stream.Transform implements iDataParser {
     })
     dataStream.on('end', () => {
       if (!streaming) {
-        cb(null, hashtable)
+        if (this.parserOptions.headersOnly) {
+          cb(null, headers)
+        } else {
+          cb(null, hashtable)
+        }
       } else {
         this.emit('end', null)
       }
@@ -159,18 +192,40 @@ export class Parser extends stream.Transform implements iDataParser {
       }
     }
     if (balancedQuotes) {
+      this.columnIndex++
+      if (this.headersParsed && this.hasFilters) {
+        if (this.columnFilters.indexOf(this.columnIndex) === -1) {
+          values[values.length] = undefined
+          return {parsed: true, values: values}
+        }
+      }
+
       parsedValue = hasQuote
-                      ? buf.toString('utf8', start + 1, end - 1).replace(this.escapedQuotes, this.parserOptions.quote)
-                      : buf.toString('utf8', start, end)
+                      ? buf.toString(this.encoding, start + 1, end - 1).replace(this.escapedQuotes, this.parserOptions.quote)
+                      : buf.toString(this.encoding, start, end)
       values[values.length] = parsedValue
     }
     return {parsed: balancedQuotes, values: values}
   }
 
+  private normalizeColumnFilters (colFilters : any[], headers : string[]) : number[] {
+    colFilters = colFilters || headers
+    colFilters = colFilters.map((c) => {
+      if (typeof c === 'number' && c <= headers.length) {
+        return c - 1
+      } else if (typeof c === 'string' && headers.indexOf(c) > -1) {
+        return headers.indexOf(c)
+      } else {
+        throw new Error('Invalid column name or index ['+ c +'] in filters')
+      }
+    })
+    return colFilters
+  }
+
   private createHash(headers: string[], line: string[], streaming : boolean = false): {} {
     let _hash = {}
-    for (var i = 0; i < line.length; i++) {
-      _hash[headers[i]] = line[i]
+    for (var i = 0; i < this.columnFilters.length; i++) {
+      _hash[headers[this.columnFilters[i]]] = line[this.columnFilters[i]]
     }
     if (streaming) {
       this.emit('row', _hash)
@@ -185,11 +240,11 @@ export class Parser extends stream.Transform implements iDataParser {
       return headers
     } else if (headers.length === 0) {
       for (let i = 0; i < numElements; i++) {
-        headers.push('_' + i)
+        headers.push('_' + (i + 1))
       }
-    } else if (headers.length < numElements) {
-      for (let i = headers.length - 1; i < numElements; i++) {
-        headers.push('_' + i)
+    } else if (headers.length < numElements - 1) {
+      for (let i = headers.length; i < numElements; i++) {
+        headers.push('_' + (i + 1))
       }
     }
     return headers
@@ -203,7 +258,9 @@ export class Parser extends stream.Transform implements iDataParser {
       separator: ',',
       quote: '"',
       encoding: 'utf8',
-      skipRows: 0
+      skipRows: 0,
+      filters: {columns: []},
+      headersOnly: false
     }
   }
 
@@ -218,6 +275,8 @@ export class Parser extends stream.Transform implements iDataParser {
     opt.quote = options.quote || defaultOpt.quote
     opt.encoding = options.encoding || defaultOpt.encoding
     opt.skipRows = options.skipRows || defaultOpt.skipRows
+    opt.filters = options.filters || defaultOpt.filters
+    opt.headersOnly = options.headersOnly || defaultOpt.headersOnly
 
     return opt
   }
