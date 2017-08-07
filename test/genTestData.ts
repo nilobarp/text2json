@@ -21,7 +21,7 @@ let mockFile = path.join(__dirname, 'spectrum', 'text', `mock_data_${numRows}.tx
 
 let headers = ['id'].concat(fields).join(colSeparator) + os.EOL
 
-fs.writeFile(mockFile, headers, 'utf-8', (err) => {
+fs.writeFile(mockFile, headers, {encoding: 'utf-8'}, (err) => {
   if (err)
     console.error(err)
 })
