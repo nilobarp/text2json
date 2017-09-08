@@ -55,7 +55,7 @@ export class Parser extends stream.Transform implements iDataParser {
     }
   }
 
-  text2json(data: Buffer | string, cb?: doneparsing): any {
+  text2json(data: any, cb?: doneparsing): any {
     let streaming : boolean = typeof cb === 'function' ? false : true
     let dataStream: fs.ReadStream
     if (data instanceof Buffer) {
