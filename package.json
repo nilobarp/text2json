@@ -13,7 +13,7 @@
   ],
   "main": "./lib/index.js",
   "scripts": {
-    "build": "gulp build",
+    "build": "tslint -c tslint.json 'src/**/*.ts' && gulp build",
     "prepublish": "npm run release",
     "pretest": "npm run build",
     "test": "DEBUG=TP* mocha dist/test/spectrum-tests.js",
@@ -22,7 +22,8 @@
     "gentestdata": "node dist/test/genTestData.js",
     "debug": "npm run build && DEBUG=TP* node test/debug.js",
     "cover": "istanbul cover _mocha dist/test/spectrum-tests.js",
-    "coveralls": "istanbul cover _mocha dist/test/spectrum-tests.js --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
+    "coveralls": "istanbul cover _mocha dist/test/spectrum-tests.js --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage",
+    "lint": "tslint -c tslint.json 'src/**/*.ts'"
   },
   "repository": {
     "type": "git",
@@ -54,6 +55,7 @@
     "mocha-lcov-reporter": "^1.2.0",
     "readline": "^1.3.0",
     "standard": "^8.6.0",
+    "tslint": "^5.11.0",
     "typescript": "^2.0.10"
   },
   "dependencies": {

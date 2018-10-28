@@ -32,23 +32,23 @@ console.time('1')
 }) */
 let rows = 0
 sub.text2json(testData)
-    .on('headers', (h) => {
-      console.log(h)
-    })
-    .on('row', (row) => {
-      // console.log(row)
-      // rows++
-    })
-    .on('end', () => {
-      logMemoryUsage()
-      // console.log(rows)
-      console.timeEnd('1')
-    })
-    .on('error', (err) => {
-      console.log(err)
-    })
+  .on('headers', (h) => {
+    console.log(h)
+  })
+  .on('row', (row) => {
+    // console.log(row)
+    // rows++
+  })
+  .on('end', () => {
+    logMemoryUsage()
+    // console.log(rows)
+    console.timeEnd('1')
+  })
+  .on('error', (err) => {
+    console.log(err)
+  })
 
-function logMemoryUsage () {
+function logMemoryUsage() {
   let memUsage = process.memoryUsage()
   console.log(`\n------------------------------------------\nHeap total: ${Math.round(memUsage.heapTotal / 1048576)} MB\tHeap used: ${Math.round(memUsage.heapUsed / 1048576)} MB`)
 }
