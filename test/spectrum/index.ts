@@ -1,26 +1,26 @@
-import * as fs from 'fs'
-import * as path from 'path'
+import * as fs from "fs";
+import * as path from "path";
 
-export var spectrumBuffer = (textFile : string, outputFile : string) : {text : Buffer, json : string} => {
-  const textFolder = path.join(__dirname, 'text')
-  const jsonFolder = path.join(__dirname, 'json')
+export let spectrumBuffer = (textFile: string, outputFile: string): { text: Buffer, json: string } => {
+  const textFolder = path.join(__dirname, "text");
+  const jsonFolder = path.join(__dirname, "json");
 
-  let item = {
+  const item = {
+    json: fs.readFileSync(path.join(jsonFolder, outputFile)).toString(),
     text: fs.readFileSync(path.join(textFolder, textFile)),
-    json: fs.readFileSync(path.join(jsonFolder, outputFile)).toString()
-  }
+  };
 
-  return item
-}
+  return item;
+};
 
-export var spectrumFile = (textFile : string, outputFile : string) : {file : string, json : string} => {
-  const textFolder = path.join(__dirname, 'text')
-  const jsonFolder = path.join(__dirname, 'json')
+export let spectrumFile = (textFile: string, outputFile: string): { file: string, json: string } => {
+  const textFolder = path.join(__dirname, "text");
+  const jsonFolder = path.join(__dirname, "json");
 
-  let item = {
+  const item = {
     file: path.join(textFolder, textFile),
-    json: fs.readFileSync(path.join(jsonFolder, outputFile)).toString()
-  }
+    json: fs.readFileSync(path.join(jsonFolder, outputFile)).toString(),
+  };
 
-  return item
-}
+  return item;
+};
